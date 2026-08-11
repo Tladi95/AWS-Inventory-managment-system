@@ -62,10 +62,6 @@ Server will run on `http://localhost:3000`
 - `GET /api/products/categories/all` - Get all categories
 - `GET /api/products/low-stock/:threshold` - Get low stock products
 
-### Audit Logs
-- `GET /api/audit` - Get all audit logs
-- `GET /api/audit/entity/:entityId` - Get logs for specific entity
-- `GET /api/audit/export/csv` - Export audit logs as CSV
 
 ## Database Schema
 
@@ -79,17 +75,7 @@ Server will run on `http://localhost:3000`
 - created_at: TIMESTAMP
 - updated_at: TIMESTAMP
 
-### audit_logs table
-- id: VARCHAR(255) PRIMARY KEY
-- timestamp: TIMESTAMP
-- action: VARCHAR(50)
-- entity_type: VARCHAR(100)
-- entity_id: VARCHAR(255)
-- entity_name: VARCHAR(255)
-- details: TEXT
-- status: VARCHAR(50)
-- changes: JSONB
-- created_at: TIMESTAMP
+
 
 ## Development
 
