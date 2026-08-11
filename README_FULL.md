@@ -154,11 +154,6 @@ See [backend/README.md](backend/README.md) for complete API documentation.
 - Unique constraint on SKU
 - Category filtering support
 
-### Audit Logs Table
-- Complete action history
-- Change tracking (before/after values)
-- Entity tracking
-- CSV export capability
 
 ## Environment Variables
 
