@@ -64,20 +64,18 @@ jobs:
             --availability-zone af-south-1a
 
       - name: SSH into EC2 and deploy
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          proxy_host: ${{ secrets.BASTION_HOST }}
-          proxy_username: ${{ secrets.BASTION_USER }}
-          proxy_key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd /app
-            export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
-            export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            docker pull ${{ env.FRONTEND_IMAGE }}:latest
-            docker pull ${{ env.BACKEND_IMAGE }}:latest
-            docker compose down
-            docker compose up -d
-            docker image prune -f
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > /tmp/deploy_key
+          chmod 600 /tmp/deploy_key
+          ssh -i /tmp/deploy_key \
+            -o StrictHostKeyChecking=no \
+            -o ProxyCommand="ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no -W %h:%p ${{ secrets.BASTION_USER }}@${{ secrets.BASTION_HOST }}" \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
+            "cd /app && \
+             export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} && \
+             export DB_PASSWORD=${{ secrets.DB_PASSWORD }} && \
+             docker pull ${{ env.FRONTEND_IMAGE }}:latest && \
+             docker pull ${{ env.BACKEND_IMAGE }}:latest && \
+             docker compose down && \
+             docker compose up -d && \
+             docker image prune -f"
