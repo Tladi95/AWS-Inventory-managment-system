@@ -54,7 +54,9 @@ jobs:
 
       - name: SSH into EC2 and deploy
         run: |
-          echo "${{ secrets.EC2_SSH_KEY }}" > /tmp/deploy_key
+          cat << 'SSHKEY' > /tmp/deploy_key
+          ${{ secrets.EC2_SSH_KEY }}
+          SSHKEY
           chmod 600 /tmp/deploy_key
           ssh-keygen -y -f /tmp/deploy_key > /tmp/deploy_key.pub
           aws ec2-instance-connect send-ssh-public-key \
