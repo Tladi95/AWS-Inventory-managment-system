@@ -1,79 +1,120 @@
 name: CI/CD Pipeline
- 
+
 on:
   push:
     branches: [main]
- 
+
 env:
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
   FRONTEND_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/inventory-frontend
   BACKEND_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/inventory-backend
- 
+  AWS_REGION: af-south-1
+  ASG_NAME: ims-asg
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
- 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
- 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
- 
+
       - name: Build and push frontend
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: ${{ env.FRONTEND_IMAGE }}:latest,${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
- 
+
       - name: Build and push backend
         uses: docker/build-push-action@v5
         with:
           context: ./backend
           push: true
           tags: ${{ env.BACKEND_IMAGE }}:latest,${{ env.BACKEND_IMAGE }}:${{ github.sha }}
- 
+
   deploy:
     runs-on: ubuntu-latest
     needs: build-and-push
- 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: SSH into EC2 and deploy
+      - name: Install Session Manager plugin
         run: |
-          cat << 'SSHKEY' > /tmp/deploy_key
-          ${{ secrets.EC2_SSH_KEY }}
-          SSHKEY
+          curl -s "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb" -o session-manager-plugin.deb
+          sudo dpkg -i session-manager-plugin.deb
+
+      - name: Write deploy key
+        run: |
+          umask 077
+          printf '%s\n' "${{ secrets.EC2_SSH_KEY }}" > /tmp/deploy_key
           chmod 600 /tmp/deploy_key
           ssh-keygen -y -f /tmp/deploy_key > /tmp/deploy_key.pub
-          aws ec2-instance-connect send-ssh-public-key \
-            --instance-id i-065f27d8641f6dbd5 \
-            --instance-os-user ${{ secrets.EC2_USER }} \
-            --ssh-public-key file:///tmp/deploy_key.pub \
-            --availability-zone af-south-1a
-          sleep 5
-          ssh -i /tmp/deploy_key \
-            -o StrictHostKeyChecking=no \
-            -o ProxyCommand="ssh -i /tmp/deploy_key -o StrictHostKeyChecking=no -W %h:%p ${{ secrets.BASTION_USER }}@${{ secrets.BASTION_HOST }}" \
-            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
-            "cd /app && \
-             export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} && \
-             export DB_PASSWORD=${{ secrets.DB_PASSWORD }} && \
-             docker pull ${{ env.FRONTEND_IMAGE }}:latest && \
-             docker pull ${{ env.BACKEND_IMAGE }}:latest && \
-             docker compose down && \
-             docker compose up -d && \
-             docker image prune -f"
+
+      - name: Discover running instance(s) in the ASG
+        id: instances
+        run: |
+          IDS=$(aws autoscaling describe-auto-scaling-groups \
+            --auto-scaling-group-name "${{ env.ASG_NAME }}" \
+            --query 'AutoScalingGroups[0].Instances[?LifecycleState==`InService`].InstanceId' \
+            --output text)
+
+          if [ -z "$IDS" ]; then
+            echo "No InService instances found in ASG ${{ env.ASG_NAME }}. Check desired_capacity." >&2
+            exit 1
+          fi
+
+          echo "instance_ids=$IDS" >> "$GITHUB_OUTPUT"
+          echo "Found instances: $IDS"
+
+      - name: Deploy to each instance
+        run: |
+          for INSTANCE_ID in ${{ steps.instances.outputs.instance_ids }}; do
+            echo "=== Deploying to $INSTANCE_ID ==="
+
+            aws ec2-instance-connect send-ssh-public-key \
+              --region "${{ env.AWS_REGION }}" \
+              --instance-id "$INSTANCE_ID" \
+              --instance-os-user "${{ secrets.EC2_USER }}" \
+              --ssh-public-key file:///tmp/deploy_key.pub
+
+            scp -o StrictHostKeyChecking=no \
+                -o ProxyCommand="aws ec2-instance-connect open-tunnel --instance-id %h --region ${{ env.AWS_REGION }}" \
+                -i /tmp/deploy_key \
+                docker-compose.yaml \
+                "${{ secrets.EC2_USER }}@$INSTANCE_ID:/app/docker-compose.yaml"
+
+            scp -o StrictHostKeyChecking=no \
+                -o ProxyCommand="aws ec2-instance-connect open-tunnel --instance-id %h --region ${{ env.AWS_REGION }}" \
+                -i /tmp/deploy_key \
+                nginx/default.conf \
+                "${{ secrets.EC2_USER }}@$INSTANCE_ID:/app/nginx/default.conf"
+
+            ssh -o StrictHostKeyChecking=no \
+                -o ProxyCommand="aws ec2-instance-connect open-tunnel --instance-id %h --region ${{ env.AWS_REGION }}" \
+                -i /tmp/deploy_key \
+                "${{ secrets.EC2_USER }}@$INSTANCE_ID" \
+                "mkdir -p /app/nginx && cd /app && \
+                 export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} && \
+                 export DB_PASSWORD=${{ secrets.DB_PASSWORD }} && \
+                 export RDS_ENDPOINT=${{ secrets.RDS_ENDPOINT }} && \
+                 docker pull ${{ env.FRONTEND_IMAGE }}:latest && \
+                 docker pull ${{ env.BACKEND_IMAGE }}:latest && \
+                 docker compose down && \
+                 docker compose up -d && \
+                 docker image prune -f"
+          done
+
+      - name: Clean up key
+        if: always()
+        run: rm -f /tmp/deploy_key /tmp/deploy_key.pub
