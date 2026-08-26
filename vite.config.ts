@@ -7,6 +7,7 @@ export default defineConfig({
     outDir: 'dist',
   },
   server: {
+    allowedHosts: ['ims-alb-168307589.af-south-1.elb.amazonaws.com'],
     proxy: {
       '/api': 'http://localhost:3000',
     },
