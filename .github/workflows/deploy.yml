@@ -94,7 +94,7 @@ jobs:
                 -o ProxyCommand="aws ec2-instance-connect open-tunnel --instance-id %h --region ${{ env.AWS_REGION }}" \
                 -i /tmp/deploy_key \
                 "${{ secrets.EC2_USER }}@$INSTANCE_ID" \
-                "sudo mkdir -p /app/nginx && sudo chown -R ${{ secrets.EC2_USER }}:${{ secrets.EC2_USER }} /app && which docker || sudo dnf install -y docker && sudo systemctl enable --now docker && sudo usermod -aG docker ${{ secrets.EC2_USER }}"
+                "sudo cloud-init status --wait >/dev/null 2>&1; sudo mkdir -p /app/nginx && sudo chown -R ${{ secrets.EC2_USER }}:${{ secrets.EC2_USER }} /app && (rpm -q docker >/dev/null 2>&1 || sudo dnf install -y docker) && sudo systemctl enable --now docker && sudo usermod -aG docker ${{ secrets.EC2_USER }}"
 
             scp -o StrictHostKeyChecking=no \
                 -o ProxyCommand="aws ec2-instance-connect open-tunnel --instance-id %h --region ${{ env.AWS_REGION }}" \
@@ -116,6 +116,7 @@ jobs:
                  export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} && \
                  export DB_PASSWORD=\$(aws ssm get-parameter --name /ims/db_password --with-decryption --query Parameter.Value --output text --region ${{ env.AWS_REGION }}) && \
                  export RDS_ENDPOINT=\$(aws ssm get-parameter --name /ims/rds_endpoint --query Parameter.Value --output text --region ${{ env.AWS_REGION }}) && \
+                 sudo docker system prune -af --volumes && \
                  docker pull ${{ env.FRONTEND_IMAGE }}:latest && \
                  docker pull ${{ env.BACKEND_IMAGE }}:latest && \
                  docker compose down && \
