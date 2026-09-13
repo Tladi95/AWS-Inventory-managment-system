@@ -199,6 +199,7 @@ Automated deployment is handled by GitHub Actions. On every push to `main`:
    - Restarts containers
 
 **Workflow File:** [.github/workflows/deploy.yml](./.github/workflows/deploy.yml)
+**Latest successfull pipline:** https://github.com/Tladi95/AWS-Inventory-managment-system/actions/runs/34592116402
 
 ### Key Security Features
 
