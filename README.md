@@ -277,7 +277,7 @@ For questions or issues:
 ---
 
 ## Quick Links
-
+-**Full system documentation**: https://capeitinitiative-my.sharepoint.com/:w:/g/personal/dickson_tladi_capaciti_org_za/IQDiepHi_eIgQocwO7x_Bl1WAYZupsoCBzH0jOGAbmqHVhk?e=jMN9e6
 - **Application Repository**: https://github.com/Tladi95/AWS-Inventory-managment-system
 - **Infrastructure Repository**: https://github.com/Tladi95/AWS-IMS-Terraform-code
 - **Backend Setup**: [backend/README.md](./backend/README.md)
