@@ -4,7 +4,7 @@ A full-stack Inventory Management System designed to streamline inventory tracki
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Overview](#overview)
 - [Architecture](#architecture)
@@ -30,7 +30,7 @@ This project demonstrates a production-ready full-stack application with:
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ![AWS IMS Architecture](./CRUD-app-ARCHITECTURE.jpg)
 
@@ -52,7 +52,6 @@ The application follows a three-tier architecture:
    - Persistent data storage
    - ACID compliance for data integrity
    - Optimized queries for performance
-
 
 
 **Key Features:**
@@ -94,10 +93,10 @@ The application follows a three-tier architecture:
 
 ---
 
-## 🚀 Infrastructure
+## Infrastructure
 
 **Infrastructure as Code Repository:**
-➡️ **[Tladi95/AWS-IMS-Terraform-code](https://github.com/Tladi95/AWS-IMS-Terraform-code)**
+**[Tladi95/AWS-IMS-Terraform-code](https://github.com/Tladi95/AWS-IMS-Terraform-code)**
 
 The application infrastructure is defined and provisioned using Terraform in a dedicated repository. This separation of concerns allows:
 
