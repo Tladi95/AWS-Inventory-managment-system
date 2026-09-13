@@ -125,7 +125,7 @@ The Terraform repository manages:
 
 ---
 
-## 🏃 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -258,14 +258,6 @@ Infrastructure monitoring and logging are configured in the Terraform repository
 2. Commit changes (`git commit -m 'Add AmazingFeature'`)
 3. Push to branch (`git push origin feature/AmazingFeature`)
 4. Open a Pull Request
-
----
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
----
 
 ## Support
 
