@@ -53,31 +53,7 @@ The application follows a three-tier architecture:
    - ACID compliance for data integrity
    - Optimized queries for performance
 
-### Network Architecture
 
-```
-┌─────────────────────────────────────────────────┐
-│              AWS Cloud                          │
-│  ┌───────────────────────────────────────────┐  │
-│  │  Application Load Balancer (ALB)          │  │
-│  └──────────────────┬──────────────────────┘  │
-│                     │                          │
-│  ┌──────────────────▼──────────────────────┐  │
-│  │  Auto Scaling Group (EC2 Instances)     │  │
-│  │  ┌──────────────────────────────────┐   │  │
-│  │  │  NGINX Reverse Proxy             │   │  │
-│  │  │  ┌────────────────────────────┐  │   │  │
-│  │  │  │  Frontend (React)          │  │   │  │
-│  │  │  │  Backend (Node.js/Express) │  │   │  │
-│  │  │  └────────────────────────────┘  │   │  │
-│  │  └──────────────────┬───────────────┘   │  │
-│  └─────────────────────┼──────────────────┘  │
-│                        │                      │
-│  ┌─────────────────────▼──────────────────┐  │
-│  │  Amazon RDS PostgreSQL (Encrypted)     │  │
-│  └────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────┘
-```
 
 **Key Features:**
 - Application runs on EC2 instances in a private subnet (no public IP)
@@ -88,7 +64,7 @@ The application follows a three-tier architecture:
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Component | Technology | Purpose |
 |-----------|-----------|---------|
@@ -102,19 +78,19 @@ The application follows a three-tier architecture:
 
 ---
 
-## ✨ Features
+## Features
 
-- ✅ Inventory item management
-- ✅ Full CRUD operations (Create, Read, Update, Delete)
-- ✅ RESTful API with TypeScript backend
-- ✅ PostgreSQL database connectivity
-- ✅ Product search and filtering
-- ✅ Category management
-- ✅ Low-stock alerts
-- ✅ Secure request routing with NGINX
-- ✅ Dockerized deployment for scalability
-- ✅ Auto-scaling on AWS
-- ✅ Automated CI/CD pipeline
+- Inventory item management
+- Full CRUD operations (Create, Read, Update, Delete)
+- RESTful API with TypeScript backend
+- PostgreSQL database connectivity
+- Product search and filtering
+- Category management
+- Low-stock alerts
+- Secure request routing with NGINX
+- Dockerized deployment for scalability
+- Auto-scaling on AWS
+- Automated CI/CD pipeline
 
 ---
 
@@ -205,7 +181,7 @@ docker-compose up
 
 ---
 
-## 🔄 CI/CD Pipeline
+## CI/CD Pipeline
 
 Automated deployment is handled by GitHub Actions. On every push to `main`:
 
@@ -227,50 +203,13 @@ Automated deployment is handled by GitHub Actions. On every push to `main`:
 
 ### Key Security Features
 
-- ✅ **OIDC Federated Authentication**: Short-lived credentials, no stored access keys
-- ✅ **Secure EC2 Connection**: Uses temporary credentials
-- ✅ **Encrypted Secrets**: Sensitive data stored as GitHub Secrets
-- ✅ **Automated Testing**: Pipeline includes validation before deployment
+- **OIDC Federated Authentication**: Short-lived credentials, no stored access keys
+- **Secure EC2 Connection**: Uses temporary credentials
+- **Encrypted Secrets**: Sensitive data stored as GitHub Secrets
+- **Automated Testing**: Pipeline includes validation before deployment
 
----
 
-## 📁 Project Structure
-
-```
-AWS-Inventory-managment-system/
-├── frontend/                          # React TypeScript Frontend
-│   ├── src/
-│   │   ├── components/               # Reusable UI components
-│   │   ├── pages/                    # Page components
-│   │   ├── services/                 # API service layer
-│   │   └── App.tsx                   # Root component
-│   ├── package.json
-│   └── README.md
-│
-├── backend/                           # Node.js/Express Backend
-│   ├── src/
-│   │   ├── routes/                   # API endpoints
-│   │   ├── controllers/              # Business logic
-│   │   ├── models/                   # Database models
-│   │   ├── middleware/               # Custom middleware
-│   │   └── index.ts                  # Server entry point
-│   ├── migrations/                   # Database migrations
-│   ├── package.json
-│   └── README.md
-│
-├── docker-compose.yml                 # Local development orchestration
-├── Dockerfile                         # Multi-stage Docker image
-├── CRUD-app-ARCHITECTURE.jpg         # Architecture diagram
-├── README.md                          # This file
-└── .github/
-    └── workflows/
-        └── deploy.yml                # CI/CD Pipeline
-
-```
-
----
-
-## 📖 Documentation
+## Documentation
 
 - **[Backend Documentation](./backend/README.md)** - API endpoints, setup, and database schema
 - **[Frontend Documentation](./frontend/README.md)** - UI components, state management, and local setup
@@ -293,7 +232,7 @@ See [backend/README.md](./backend/README.md) for full API documentation.
 
 ---
 
-## 🔐 Security
+## Security
 
 - **Network Security**: Private subnet with no direct public access
 - **Encryption**: RDS database encryption at rest
@@ -303,7 +242,7 @@ See [backend/README.md](./backend/README.md) for full API documentation.
 
 ---
 
-## 📊 Monitoring & Logging
+## Monitoring & Logging
 
 Infrastructure monitoring and logging are configured in the Terraform repository:
 - CloudWatch for application logs
@@ -313,7 +252,7 @@ Infrastructure monitoring and logging are configured in the Terraform repository
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 1. Create a feature branch (`git checkout -b feature/AmazingFeature`)
 2. Commit changes (`git commit -m 'Add AmazingFeature'`)
@@ -322,13 +261,13 @@ Infrastructure monitoring and logging are configured in the Terraform repository
 
 ---
 
-## 📝 License
+## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 ---
 
-## 📞 Support
+## Support
 
 For questions or issues:
 - Open an issue on [GitHub Issues](https://github.com/Tladi95/AWS-Inventory-managment-system/issues)
@@ -337,7 +276,7 @@ For questions or issues:
 
 ---
 
-## 🚦 Quick Links
+## Quick Links
 
 - **Application Repository**: https://github.com/Tladi95/AWS-Inventory-managment-system
 - **Infrastructure Repository**: https://github.com/Tladi95/AWS-IMS-Terraform-code
